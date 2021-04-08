@@ -1,0 +1,25 @@
+#cloud-config
+packages: - java-1.8.0-openjdk-devel - docker
+
+# move to ec2-user's home directory
+cd /home/ec2-user/
+yum install  -y  java-1.8.0-openjdk-devel docker
+# '** Install Maven - you need 3.1.1 yum has only 3.0.5 **'
+wget https://www.mirrorservice.org/sites/ftp.apache.org/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz .
+tar xvf apache-maven-3.6.3-bin.tar.gz
+# '**Adding Environment Variables to bashrc**'
+cp /home/ec2-user/.bashrc ./my_bash_backup.txt
+echo 'export PATH=$JAVA_HOME/bin:$PATH'>> .bashrc
+echo "export JAVA_HOME=\"$(find / 2>/dev/null | grep openjdk | grep jre/bin$ | sed s:/jre/bin::)\"">> /home/ec2-user/.bashrc
+echo 'export M2_HOME="/home/ec2-user/apache-maven-3.6.3"'>> /home/ec2-user/.bashrc
+source /home/ec2-user/.bashrc
+# '**Download the spring pet-clinic**'
+wget https://github.com/spring-projects/spring-petclinic/archive/1.5.x.tar.gz /home/ec2-user/
+# '**Unpack Spring Pet Clinic the tar:**'
+tar -xzf /home/ec2-user/1.5.x.tar.gz
+# '**Move into the directory of the pet-clinic**'
+cd /home/ec2-user/spring-petclinic-1.5.x
+echo '**Build the project**'
+mvn clean:clean
+# '**Run the project with nohup (background process)**'
+nohup ./mvnw spring-boot:run
